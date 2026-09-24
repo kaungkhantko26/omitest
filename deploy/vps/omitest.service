@@ -11,6 +11,7 @@ User=omitest
 Group=omitest
 WorkingDirectory=/opt/omitest
 Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/opt/omitest
 Environment=SKIP_DEPENDENCY_INSTALL=true
 Environment=SKIP_TOOL_INSTALL=true
 Environment=MALLOC_ARENA_MAX=2
