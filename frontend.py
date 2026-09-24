@@ -1929,11 +1929,20 @@ def show_scan_results(session_details: Dict):
             if host.get("os_guess"):
                 st.markdown(f"**OS Guess:** {host['os_guess']}")
             if host.get("os_family"):
-                st.markdown(
-                    f"**OS Classification:** `{host['os_family']}` "
-                    f"(confidence {float(host.get('os_confidence') or 0):.2f})"
-                )
-                if host.get("architecture"):
+                _os_family = str(host.get("os_family") or "unknown")
+                _os_confidence = float(host.get("os_confidence") or 0)
+                if _os_family == "unknown":
+                    st.markdown("**OS Classification:** `unverified`")
+                    st.caption(
+                        "No OS-specific fingerprint was observed. Generic web technology "
+                        "or a CDN/proxy is not enough to identify the origin server OS."
+                    )
+                else:
+                    st.markdown(
+                        f"**OS Classification:** `{_os_family}` "
+                        f"(confidence {_os_confidence:.2f})"
+                    )
+                if host.get("architecture") and host.get("architecture") != "unknown":
                     st.markdown(
                         f"**Architecture:** `{host['architecture']}` "
                         f"(confidence {float(host.get('architecture_confidence') or 0):.2f})"
