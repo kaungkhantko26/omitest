@@ -323,16 +323,49 @@ class OmitestAIConnector:
                 item.get("text", "") for item in data.get("content", [])
                 if item.get("type") == "text"
             )
+            raw_usage = data.get("usage") or {}
+            prompt_tokens = int(raw_usage.get("input_tokens") or 0)
+            completion_tokens = int(raw_usage.get("output_tokens") or 0)
         else:
             choices = data.get("choices") or []
             if not choices:
                 raise ConnectionError("Provider responded successfully but returned no choices")
             preview = choices[0].get("message", {}).get("content", "")
+            raw_usage = data.get("usage") or {}
+            prompt_tokens = int(raw_usage.get("prompt_tokens") or raw_usage.get("input_tokens") or 0)
+            completion_tokens = int(raw_usage.get("completion_tokens") or raw_usage.get("output_tokens") or 0)
+        total_tokens = int(raw_usage.get("total_tokens") or (prompt_tokens + completion_tokens))
+
+        # OpenAI-compatible gateways commonly expose request/token rate limits
+        # in headers, but there is no universal account-credit endpoint. Return
+        # only a small allowlist and never reflect arbitrary provider headers.
+        rate_limits = {}
+        for header in (
+            "x-ratelimit-remaining-requests", "x-ratelimit-remaining-tokens",
+            "x-ratelimit-reset-requests", "x-ratelimit-reset-tokens",
+            "x-credits-remaining", "x-balance-remaining",
+        ):
+            value = response.headers.get(header)
+            if value is not None:
+                rate_limits[header] = value
+        context_remaining = max(0, self.context_window - total_tokens) if total_tokens else None
         return {
             "ok": True, "provider": self.provider, "model": self.api_model,
             "latency_ms": round((time.monotonic() - started) * 1000),
             "message": "Connection and model response verified",
             "preview": str(preview)[:120],
+            "usage": {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": total_tokens,
+                "context_window": self.context_window,
+                "context_remaining": context_remaining,
+            },
+            "rate_limits": rate_limits,
+            "account_balance_available": bool(
+                rate_limits.get("x-credits-remaining")
+                or rate_limits.get("x-balance-remaining")
+            ),
         }
 
     async def _post_api(self, client: httpx.AsyncClient, payload: dict, headers: dict) -> httpx.Response:

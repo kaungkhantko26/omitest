@@ -3799,6 +3799,40 @@ def show_settings():
                             )
                             if result.get("preview"):
                                 st.caption(f"Model reply: {result['preview']}")
+                            usage = result.get("usage") or {}
+                            if usage:
+                                st.markdown("#### Token usage test")
+                                u1, u2, u3, u4 = st.columns(4)
+                                u1.metric("Input", f"{int(usage.get('prompt_tokens') or 0):,}")
+                                u2.metric("Output", f"{int(usage.get('completion_tokens') or 0):,}")
+                                u3.metric("Total used", f"{int(usage.get('total_tokens') or 0):,}")
+                                remaining = usage.get("context_remaining")
+                                u4.metric(
+                                    "Context left",
+                                    f"{int(remaining):,}" if remaining is not None else "Not reported",
+                                )
+                                st.caption(
+                                    "Context left is for this test request, not the API account's "
+                                    "billing balance."
+                                )
+                            limits = result.get("rate_limits") or {}
+                            if limits:
+                                st.markdown("#### Provider limits")
+                                friendly_headers = {
+                                    "x-ratelimit-remaining-requests": "Requests remaining",
+                                    "x-ratelimit-remaining-tokens": "Rate-limit tokens remaining",
+                                    "x-ratelimit-reset-requests": "Request limit resets",
+                                    "x-ratelimit-reset-tokens": "Token limit resets",
+                                    "x-credits-remaining": "Credits remaining",
+                                    "x-balance-remaining": "Balance remaining",
+                                }
+                                for header, value in limits.items():
+                                    st.write(f"**{friendly_headers.get(header, header)}:** `{value}`")
+                            if not result.get("account_balance_available"):
+                                st.info(
+                                    "This provider did not expose account credit/balance. "
+                                    "OpenAI-compatible chat APIs do not define a standard balance endpoint."
+                                )
                         else:
                             try:
                                 detail = response.json().get("detail", response.text)
