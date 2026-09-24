@@ -35,6 +35,15 @@ sudo -u omitest /opt/omitest/venv/bin/pip install -r /opt/omitest/requirements.t
 sudo -u omitest cp /opt/omitest/.env.example /opt/omitest/.env
 ```
 
+For small VirtualBox disks, install without retaining pip's wheel cache:
+
+```bash
+python3 -m pip cache purge || true
+sudo apt clean
+sudo -u omitest /opt/omitest/venv/bin/pip install --no-cache-dir --prefer-binary \
+  -r /opt/omitest/requirements.txt
+```
+
 On Kali, install the optional workflow tools you intend to authorize (package
 availability differs on plain Debian/Ubuntu):
 

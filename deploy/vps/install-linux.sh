@@ -42,9 +42,9 @@ if [ ! -x "$INSTALL_DIR/venv/bin/python" ]; then
     runuser -u "$SERVICE_USER" -- python3 -m venv "$INSTALL_DIR/venv"
 fi
 runuser -u "$SERVICE_USER" -- "$INSTALL_DIR/venv/bin/pip" install \
-    --upgrade pip wheel
+    --no-cache-dir --upgrade pip wheel
 runuser -u "$SERVICE_USER" -- "$INSTALL_DIR/venv/bin/pip" install \
-    -r "$INSTALL_DIR/requirements.txt"
+    --no-cache-dir --prefer-binary -r "$INSTALL_DIR/requirements.txt"
 
 if [ ! -f "$INSTALL_DIR/.env" ]; then
     runuser -u "$SERVICE_USER" -- cp "$INSTALL_DIR/.env.example" "$INSTALL_DIR/.env"

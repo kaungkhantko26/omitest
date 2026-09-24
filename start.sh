@@ -19,6 +19,15 @@ if [ ! -f "requirements.txt" ]; then
     exit 1
 fi
 
+# Pip caches built wheels under ~/.cache by default, which is especially easy
+# to exhaust on small Kali VirtualBox disks. Report capacity up front and use
+# no-cache installation below so each package is stored only in the venv.
+_FREE_KB=$(df -Pk . 2>/dev/null | awk 'NR == 2 {print $4}')
+if [ -n "$_FREE_KB" ] && [ "$_FREE_KB" -lt 524288 ] 2>/dev/null; then
+    echo "⚠️  Low disk space: $((_FREE_KB / 1024)) MB free. At least 512 MB is recommended."
+    echo "   Kali cleanup: python3 -m pip cache purge; sudo apt clean; sudo apt autoremove"
+fi
+
 # Check if virtual environment exists, create if not
 if [ ! -d "venv" ]; then
     echo "🔧 Creating virtual environment..."
@@ -35,10 +44,12 @@ source venv/bin/activate
 
 # Install requirements if not already installed
 if [ "${SKIP_DEPENDENCY_INSTALL:-false}" != "true" ]; then
-    echo "📦 Installing dependencies..."
-    pip install -r requirements.txt --quiet
+    echo "📦 Installing dependencies without a persistent pip cache..."
+    python -m pip install --no-cache-dir --prefer-binary -r requirements.txt --quiet
     if [ $? -ne 0 ]; then
         echo "❌ Failed to install dependencies"
+        df -h . 2>/dev/null || true
+        echo "   If the disk is full, run: python3 -m pip cache purge && sudo apt clean"
         exit 1
     fi
 fi
