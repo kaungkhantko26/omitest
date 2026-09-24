@@ -1,4 +1,4 @@
-# KMN-CyberSeek Reasoning Evals
+# omitest Reasoning Evals
 
 A small harness that measures the **quality of the AI's next-step decisions**
 against fixed engagement scenarios, so a change to `ai/prompts.py` (or the model)
@@ -20,12 +20,12 @@ window, temperature, run count, and application revision. Do not compare a local
 
 ```bash
 # Score against your configured provider (DeepSeek API or local Ollama).
-# Uses the same KMN_AI_Connector the live loop uses, so it exercises the real
+# Uses the same OmitestAIConnector the live loop uses, so it exercises the real
 # prompt + parsing path.
 python3 evals/run_evals.py --runs 3
 
 # Write reproducible provider/model metadata and per-scenario results
-python3 evals/run_evals.py --runs 5 --json-out /tmp/kmn-eval.json
+python3 evals/run_evals.py --runs 5 --json-out /tmp/omitest-eval.json
 
 # Validate the scoring rules themselves — no model or network needed.
 python3 evals/run_evals.py --selfcheck

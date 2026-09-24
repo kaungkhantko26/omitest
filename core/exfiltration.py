@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Data Exfiltration Module (Roadmap feature)
+omitest Data Exfiltration Module (Roadmap feature)
 
 Stealthy, staged extraction of confirmed loot. Pure data + helpers — no I/O, no
 orchestrator coupling — so it is unit-testable and safe to import anywhere.

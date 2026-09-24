@@ -1672,7 +1672,7 @@ def show_session_overview(session_details: Dict):
             st.download_button(
                 label="💾 Save Markdown (.md)",
                 data=st.session_state[_md_key],
-                file_name=f"kmn_report_{session_id[:12]}.md",
+                file_name=f"omitest_report_{session_id[:12]}.md",
                 mime="text/markdown",
                 use_container_width=True,
                 key=f"dl_md_{session_id}",
@@ -1694,7 +1694,7 @@ def show_session_overview(session_details: Dict):
             st.download_button(
                 label="💾 Save DOCX",
                 data=st.session_state[_docx_key],
-                file_name=f"kmn_report_{session_id[:12]}.docx",
+                file_name=f"omitest_report_{session_id[:12]}.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 use_container_width=True,
                 key=f"dl_docx_{session_id}",
@@ -1720,7 +1720,7 @@ def show_session_overview(session_details: Dict):
         st.download_button(
             label="💾 Save Session Archive (.zip)",
             data=st.session_state[_archive_key],
-            file_name=f"kmn_archive_{session_id[:12]}.zip",
+            file_name=f"omitest_archive_{session_id[:12]}.zip",
             mime="application/zip",
             use_container_width=True,
             key=f"dl_archive_{session_id}",
@@ -2328,7 +2328,7 @@ def show_evidence(session_details: Dict):
             st.download_button(
                 label="💾 Save JSON",
                 data=st.session_state[_json_key],
-                file_name=f"kmn_report_{sid[:12]}.json",
+                file_name=f"omitest_report_{sid[:12]}.json",
                 mime="application/json",
                 use_container_width=True,
                 key=f"dl_json_{sid}",
@@ -2355,7 +2355,7 @@ def show_evidence(session_details: Dict):
             st.download_button(
                 label="💾 Save PDF",
                 data=st.session_state[_pdf_key],
-                file_name=f"kmn_report_{sid[:12]}.pdf",
+                file_name=f"omitest_report_{sid[:12]}.pdf",
                 mime="application/pdf",
                 use_container_width=True,
                 key=f"dl_pdf_{sid}",
@@ -2448,7 +2448,7 @@ def show_evidence(session_details: Dict):
             st.download_button(
                 label="💾 Save HTML",
                 data=st.session_state[_html_key],
-                file_name=f"kmn_report_{sid[:12]}.html",
+                file_name=f"omitest_report_{sid[:12]}.html",
                 mime="text/html",
                 use_container_width=True,
                 key=f"dl_html_{sid}",
@@ -3869,7 +3869,7 @@ def show_settings():
         api_timeout = st.number_input("API Timeout (seconds)", 1, 300, 30)
         
         st.markdown("#### Database")
-        db_path = st.text_input("Database Path", "kmn_cyberseek.db")
+        db_path = st.text_input("Database Path", "omitest.db")
         backup_interval = st.selectbox("Backup Interval", ["Never", "Daily", "Weekly", "Monthly"])
         
         if backup_interval != "Never":
@@ -3878,7 +3878,7 @@ def show_settings():
         
         st.markdown("#### Logging")
         log_level = st.selectbox("Log Level", ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
-        log_file = st.text_input("Log File", "kmn_cyberseek.log")
+        log_file = st.text_input("Log File", "omitest.log")
         log_rotation = st.checkbox("Enable log rotation", value=True)
         
         if log_rotation:

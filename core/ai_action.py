@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Structured AI Action Model
+omitest Structured AI Action Model
 
 Instead of returning a plain command string, the AI response should include
 structured metadata that the orchestrator needs to route, verify, and fall back

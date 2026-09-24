@@ -3,38 +3,38 @@ import asyncio
 import httpx
 import pytest
 
-from ai.connector import KMN_AI_Connector, _chat_completions_url
+from ai.connector import OmitestAIConnector, _chat_completions_url
 
 
 def test_cloud_provider_aliases_and_endpoints(monkeypatch):
     key = "provider-test-key-123456"
-    deepseek = KMN_AI_Connector(provider="api", api_key=key, api_model="deepseek-chat")
+    deepseek = OmitestAIConnector(provider="api", api_key=key, api_model="deepseek-chat")
     assert deepseek.provider == "deepseek"
     assert "deepseek.com" in deepseek.api_urls["deepseek"]
 
-    openai = KMN_AI_Connector(provider="openai", api_key=key, api_model="gpt-4o-mini")
+    openai = OmitestAIConnector(provider="openai", api_key=key, api_model="gpt-4o-mini")
     assert openai.provider == "openai"
     assert openai.api_model == "gpt-4o-mini"
     assert "openai.com" in openai.api_urls["openai"]
 
-    claude = KMN_AI_Connector(provider="claude", api_key=key)
+    claude = OmitestAIConnector(provider="claude", api_key=key)
     assert claude.provider == "anthropic"
     assert "anthropic.com" in claude.api_urls["anthropic"]
 
-    router = KMN_AI_Connector(provider="openrouter", api_key=key)
+    router = OmitestAIConnector(provider="openrouter", api_key=key)
     assert router.provider == "openrouter"
     assert router.api_model == "openai/gpt-4o-mini"
     assert "openrouter.ai" in router.api_urls["openrouter"]
 
 
 def test_none_provider_does_not_make_network_calls():
-    connector = KMN_AI_Connector(provider="none")
+    connector = OmitestAIConnector(provider="none")
     assert connector.provider == "none"
 
 
 def test_openai_compatible_provider_normalizes_base_url(monkeypatch):
     monkeypatch.setenv("COMPATIBLE_BASE_URL", "https://example.test/v1/")
-    connector = KMN_AI_Connector(
+    connector = OmitestAIConnector(
         provider="compatible", api_key="compatible-test-key-123456", api_model="gpt-5.4"
     )
     assert connector.provider == "compatible"
@@ -62,7 +62,7 @@ def test_compatible_request_falls_back_to_minimal_payload():
             return httpx.Response(400, json={"error": {"message": "unsupported temperature"}})
         return httpx.Response(200, json={"choices": [{"message": {"content": "OK"}}]})
 
-    connector = KMN_AI_Connector(
+    connector = OmitestAIConnector(
         provider="compatible", api_key="compatible-test-key-123456",
         api_model="gpt-5.4", api_base_url="https://example.test/v1",
     )

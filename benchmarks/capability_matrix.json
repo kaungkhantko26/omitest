@@ -1,5 +1,5 @@
 {
-  "format": "kmn-agent-capability-matrix",
+  "format": "omitest-agent-capability-matrix",
   "version": 1,
   "assessment_policy": "A system is marked implemented only when the capability is represented in code and covered by a deterministic regression test. Live effectiveness remains unassessed until a reproducible lab run is attached.",
   "capabilities": [
@@ -15,7 +15,7 @@
     {"id": "sandbox_guidance", "category": "deployment", "description": "Capability policy and isolated lab deployment guidance"}
   ],
   "systems": {
-    "KMN-CyberSeek": {
+    "omitest": {
       "source": "repository",
       "assessment": "code_and_regression_tests",
       "capabilities": {

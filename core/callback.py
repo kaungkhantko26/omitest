@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek callback-endpoint resolution.
+omitest callback-endpoint resolution.
 
 A reverse shell only works if the TARGET can route back to the operator's
 listener. On a LAN lab the operator's LAN IP is reachable, so the current

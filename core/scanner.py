@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Scanner Module
+omitest Scanner Module
 Handles network scanning and reconnaissance operations.
 """
 

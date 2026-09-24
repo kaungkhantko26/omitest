@@ -131,11 +131,11 @@ def test_is_windows_rce_proof_rejects_self_referential_halt_echo():
     its OWN command text - that must not count as evidence retrieved from
     the target."""
     banner = (
-        "echo '[KMN-CYBERSEEK] RUN TERMINATED | TARGET: 192.168.100.194 | "
+        "echo '[OMITEST] RUN TERMINATED | TARGET: 192.168.100.194 | "
         "OBJECTIVE ACHIEVED: SYSTEM (nt authority\\system) | NO FURTHER TARGET TRAFFIC'"
     )
     output = (
-        "[KMN-CYBERSEEK] RUN TERMINATED | TARGET: 192.168.100.194 | "
+        "[OMITEST] RUN TERMINATED | TARGET: 192.168.100.194 | "
         "OBJECTIVE ACHIEVED: SYSTEM (nt authority\\system) | NO FURTHER TARGET TRAFFIC"
     )
     assert _is_windows_rce_proof(banner, output) is False
@@ -355,8 +355,8 @@ def test_validate_report_findings_drops_junk_and_self_referential_entries():
             {"service": "http", "port": 80, "command": "curl .../cmd.php?cmd=whoami",
              "proof": "nt authority\\system", "privilege": "root/SYSTEM"},
             {"service": "unknown", "port": "",
-             "command": "echo '[KMN] OBJECTIVE ACHIEVED: SYSTEM (nt authority\\system)'",
-             "proof": "[KMN] OBJECTIVE ACHIEVED: SYSTEM (nt authority\\system)",
+             "command": "echo '[OMITEST] OBJECTIVE ACHIEVED: SYSTEM (nt authority\\system)'",
+             "proof": "[OMITEST] OBJECTIVE ACHIEVED: SYSTEM (nt authority\\system)",
              "privilege": "root/SYSTEM"},
         ]},
         "credentials": [

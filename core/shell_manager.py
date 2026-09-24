@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Shell Session Manager
+omitest Shell Session Manager
 
 Manages persistent Metasploit multi/handler processes and tracks active
 meterpreter / reverse-shell sessions that result from successful exploits.
@@ -171,7 +171,7 @@ class MsfHandlerProcess:
             logger.error(f"[Handler {self.handler_id}] {validation_error}")
             self.status = "error"
             return False
-        rc_path = f"/tmp/kmn_handler_{self.handler_id}.rc"
+        rc_path = f"/tmp/omitest_handler_{self.handler_id}.rc"
         self._rc_path = rc_path
         # LHOST/LPORT are what the payload dials (the reachable, advertised
         # address). When the listener must bind elsewhere — behind a tunnel or a
@@ -370,7 +370,7 @@ class MsfHandlerProcess:
             return f"[Error: session {msf_id} not tracked by this handler]"
 
         sess   = self._sessions[msf_id]
-        marker = f"__KMN_{uuid.uuid4().hex[:10]}__"
+        marker = f"__OMITEST_{uuid.uuid4().hex[:10]}__"
 
         self._pending_marker = marker
         self._marker_event.clear()
@@ -448,7 +448,7 @@ class MsfHandlerProcess:
         """Run a non-interactive command in the persistent MSF console itself."""
         if not self._process or self._process.returncode is not None:
             return "[Error: handler process is not running]"
-        marker = f"__KMN_CONSOLE_{uuid.uuid4().hex[:10]}__"
+        marker = f"__OMITEST_CONSOLE_{uuid.uuid4().hex[:10]}__"
         async with self._command_lock:
             self._pending_marker = marker
             self._marker_event.clear()

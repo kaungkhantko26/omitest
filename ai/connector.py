@@ -111,7 +111,7 @@ class AIResponse(BaseModel):
     fallback_action: str = Field("", description="Next action if this action fails")
 
 
-class KMN_AI_Connector:
+class OmitestAIConnector:
     """AI connector supporting Ollama and multiple cloud API providers."""
     
     def __init__(self, provider: str = None, api_key: Optional[str] = None,
@@ -670,7 +670,7 @@ class KMN_AI_Connector:
                 return asyncio.run(self.ask_ai_api(prompt, session_id))
             else:
                 raise RuntimeError(
-                    "KMN_AI_Connector.ask_ai() is synchronous and cannot be called from "
+                    "OmitestAIConnector.ask_ai() is synchronous and cannot be called from "
                     "inside a running event loop. Use 'await ask_ai_async(...)' instead."
                 )
         else:
@@ -806,6 +806,6 @@ class KMN_AI_Connector:
 
 
 # Helper function for backward compatibility
-def get_ai_connector(provider: str = "local", api_key: Optional[str] = None) -> KMN_AI_Connector:
+def get_ai_connector(provider: str = "local", api_key: Optional[str] = None) -> OmitestAIConnector:
     """Factory function to get AI connector instance."""
-    return KMN_AI_Connector(provider=provider, api_key=api_key)
+    return OmitestAIConnector(provider=provider, api_key=api_key)

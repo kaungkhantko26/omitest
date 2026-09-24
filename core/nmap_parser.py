@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Nmap XML Parser
+omitest Nmap XML Parser
 
 Parses nmap -oX XML output into structured service records.
 Does NOT depend on python-nmap, so it is safe to import anywhere.

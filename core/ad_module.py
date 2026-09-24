@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Active Directory Exploitation Module (Roadmap: KMN-Training-Win)
+omitest Active Directory Exploitation Module (Roadmap: omitest-training-win)
 
 Target-agnostic Active Directory methodology. Provides:
 
@@ -194,7 +194,7 @@ def ad_context_block(ad: Dict, creds: List[Dict] = None) -> str:
     if creds:
         cred_line = "\nYou HAVE domain credentials — use them in the commands above.\n"
     lines = [
-        "\n=== ACTIVE DIRECTORY TARGET (KMN-Training-Win methodology) ===",
+        "\n=== ACTIVE DIRECTORY TARGET (omitest-training-win methodology) ===",
         f"Detected AD environment (confidence {ad.get('confidence', 0):.2f}): "
         f"signals {', '.join(ad.get('signals', [])[:6])}.",
         f"Assume domain '{dom}' and DC '{dc}' unless enumeration says otherwise.",

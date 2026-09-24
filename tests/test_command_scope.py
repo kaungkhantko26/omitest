@@ -64,8 +64,8 @@ def test_smb_negative():
     assert not validate_smb_auth("NT_STATUS_LOGON_FAILURE")
 
 def test_web_rce_nonce():
-    assert validate_web_rce("... KMN_RCE_DEADBEEF ...", nonce="KMN_RCE_DEADBEEF")
-    assert not validate_web_rce("no nonce here", nonce="KMN_RCE_DEADBEEF")
+    assert validate_web_rce("... OMITEST_RCE_DEADBEEF ...", nonce="OMITEST_RCE_DEADBEEF")
+    assert not validate_web_rce("no nonce here", nonce="OMITEST_RCE_DEADBEEF")
 
 def test_root_priv_linux():
     assert validate_root_privilege("uid=0(root) gid=0(root) groups=0(root)")

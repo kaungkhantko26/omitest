@@ -1,12 +1,12 @@
 """
-KMN-CyberSeek LLM Security Testing Module (Roadmap feature)
+omitest LLM Security Testing Module (Roadmap feature)
 
 Offensive testing of *other* AI/LLM implementations for prompt-injection and
 related weaknesses. Pure data + helpers — no I/O, no orchestrator coupling — so it
 is unit-testable and safe to import anywhere.
 
 This is the offensive mirror of the framework's own prompt-injection *defences*:
-where the self-defence fence keeps tool output from steering KMN-CyberSeek, this
+where the self-defence fence keeps tool output from steering omitest, this
 module produces the payloads and methodology to test a target LLM product for the
 same class of bug (direct/indirect injection, jailbreak, system-prompt leak,
 tool/plugin abuse, excessive-agency).

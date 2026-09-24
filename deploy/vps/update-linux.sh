@@ -40,8 +40,11 @@ install -d -m 0700 "$BACKUP_ROOT"
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 BACKUP_DIR="$BACKUP_ROOT/$STAMP"
 install -d -m 0700 "$BACKUP_DIR"
-for runtime_file in .env kmn_cyberseek.db; do
+for runtime_file in .env; do
     [ -f "$INSTALL_DIR/$runtime_file" ] && cp -p "$INSTALL_DIR/$runtime_file" "$BACKUP_DIR/"
+done
+for db_file in "$INSTALL_DIR"/*.db "$INSTALL_DIR"/*.db-wal "$INSTALL_DIR"/*.db-shm; do
+    [ -f "$db_file" ] && cp -p "$db_file" "$BACKUP_DIR/"
 done
 
 echo "[omitest] Updating source..."

@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek CVE Lookup Module
+omitest CVE Lookup Module
 Optional, best-effort CVE enrichment for discovered services via the Vulners API.
 
 IMPORTANT - honesty note about this module:
@@ -327,7 +327,7 @@ async def lookup_cves_nvd(
 # CVSS score that has no public exploit. Both are best-effort and never raise.
 
 _KEV_CACHE_PATH = os.path.join(
-    os.getenv("KMN_CACHE_DIR", "/tmp"), "kmn_kev_catalog.json"
+    os.getenv("OMITEST_CACHE_DIR", "/tmp"), "omitest_kev_catalog.json"
 )
 _KEV_TTL_SECONDS = 24 * 3600
 _kev_set: Optional[set] = None
@@ -338,7 +338,7 @@ _kev_lock = asyncio.Lock()
 async def load_kev(force: bool = False) -> set:
     """Return the set of CVE IDs in the CISA KEV catalog (uppercased).
 
-    Cached in memory for the process and on disk (KMN_CACHE_DIR, default /tmp)
+    Cached in memory for the process and on disk (OMITEST_CACHE_DIR, default /tmp)
     so it survives restarts and works offline after the first successful fetch.
     Refreshes at most once per day. Returns an empty set if it has never been
     fetched and cannot be reached — callers treat "not in set" as "not KEV".

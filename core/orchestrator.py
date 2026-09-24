@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Orchestrator Module
+omitest Orchestrator Module
 Manages penetration testing sessions, coordinates between AI, scanner, and execution.
 """
 
@@ -18,6 +18,7 @@ import time
 import uuid
 import zipfile
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
 # ---------------------------------------------------------------------------
@@ -68,7 +69,7 @@ _STOP_INTENT_RE = re.compile(
     re.IGNORECASE,
 )
 
-from ai.connector import KMN_AI_Connector, AIResponse
+from ai.connector import OmitestAIConnector, AIResponse
 from core.scanner import Scanner, classify_os
 from core.memory_index import FindingsIndex
 from core.validators import (
@@ -1031,13 +1032,25 @@ class Session:
 class Orchestrator:
     """Main orchestrator for AI-driven penetration testing."""
     
-    def __init__(self, ai_connector: KMN_AI_Connector, scanner: Scanner):
+    def __init__(self, ai_connector: OmitestAIConnector, scanner: Scanner):
         self.ai_connector = ai_connector
         self.scanner = scanner
         self.sessions: Dict[str, Session] = {}
         self.pending_commands: Dict[str, Dict] = {}  # command_id -> command_data
-        self.db_path = (os.getenv("DB_PATH", "kmn_cyberseek.db").strip()
-                        or "kmn_cyberseek.db")
+        configured_db = os.getenv("DB_PATH", "").strip()
+        self.db_path = configured_db or "omitest.db"
+        # Preserve existing installations after the product rename without
+        # carrying a legacy brand literal in the repository. If there is one
+        # unambiguous older database, migrate it to the current default name.
+        if not configured_db and not Path(self.db_path).exists():
+            older_databases = [path for path in Path.cwd().glob("*.db")
+                               if path.name != self.db_path]
+            if len(older_databases) == 1:
+                try:
+                    older_databases[0].replace(self.db_path)
+                    logger.info("Migrated existing database to %s", self.db_path)
+                except OSError as exc:
+                    logger.warning("Could not migrate existing database: %s", exc)
         # Shared, non-session-scoped reference cache built by threat-intel research
         # (core/threat_intel.py) - see _load_threat_intel_cache()
         self.threat_intel_cache: List[Dict] = []
@@ -1663,7 +1676,7 @@ class Orchestrator:
         """Write a portable session bundle for long-term retention/replay."""
         report = self.get_session_report(session_id)
         if output_path is None:
-            output_path = f"/tmp/kmn_archive_{session_id[:12]}.zip"
+            output_path = f"/tmp/omitest_archive_{session_id[:12]}.zip"
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as archive:
             archive.writestr("session.json", json.dumps(
                 report, indent=2, ensure_ascii=False, default=str
@@ -7238,7 +7251,7 @@ Domain rule: If Target Domain is provided ({session.target_domain}), use domain 
 
     def _track_task(self, session_id: str, coroutine, label: str = "background"):
         """Create a session-owned task and observe unexpected exceptions."""
-        task = asyncio.create_task(coroutine, name=f"kmn:{session_id}:{label}")
+        task = asyncio.create_task(coroutine, name=f"omitest:{session_id}:{label}")
         tasks = self._background_tasks.setdefault(session_id, set())
         tasks.add(task)
 

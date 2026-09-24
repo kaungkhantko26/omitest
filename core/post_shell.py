@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Post-Shell Command Delivery (Roadmap feature)
+omitest Post-Shell Command Delivery (Roadmap feature)
 
 After a Meterpreter/shell session lands on the managed handler, the operator (or
 the AI) needs to run a *batch* of post-exploitation commands immediately — not

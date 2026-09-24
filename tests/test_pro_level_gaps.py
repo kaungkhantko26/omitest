@@ -1,5 +1,5 @@
 """Regression tests for the "pro-level pentester" gap analysis (2026-09-15,
-fourth pass): fixes aimed at the 5 bars the user set for calling KMN-CyberSeek
+fourth pass): fixes aimed at the 5 bars the user set for calling omitest
 a professional-style autonomous pentester --
 
   1. discovery -> exploitation -> post-ex -> closure repeatable

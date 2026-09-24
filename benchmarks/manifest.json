@@ -1,5 +1,5 @@
 {
-  "format": "kmn-autonomous-pentest-benchmark",
+  "format": "omitest-autonomous-pentest-benchmark",
   "version": 1,
   "status": "self-scored",
   "independent_validation": false,

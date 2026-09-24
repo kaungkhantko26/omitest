@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Coverage Model (Coverage Engine — M1)
+omitest Coverage Model (Coverage Engine — M1)
 
 Tracks, per service, which playbook steps have been attempted, derives a
 service state from that, and computes a *coverage-derived* objective progress.

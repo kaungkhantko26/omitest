@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Validators Module
+omitest Validators Module
 Centralized safety checks: target format validation, scope allowlisting, and a
 binary allowlist used to gate the fully-autonomous (zero-human-review) auto-execute path.
 
@@ -485,7 +485,7 @@ def validate_smb_auth(output: str) -> bool:
     return bool(ok_pats.search(out))
 
 
-_WEB_RCE_NONCE_RE = _re.compile(r"KMN_RCE_[A-F0-9]{8}", _re.IGNORECASE)
+_WEB_RCE_NONCE_RE = _re.compile(r"OMITEST_RCE_[A-F0-9]{8}", _re.IGNORECASE)
 
 def validate_web_rce(output: str, nonce: Optional[str] = None) -> bool:
     """Web RCE confirmed — check nonce echo or known execution indicators."""

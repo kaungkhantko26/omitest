@@ -254,5 +254,5 @@ omitest/
 │   └── test_validators.py
 ├── features.md              # Feature detail + API reference + project structure
 ├── change_log.md            # Version history
-└── kmn_cyberseek.db         # SQLite database (auto-created on first run)
+└── omitest.db         # SQLite database (auto-created on first run)
 ```

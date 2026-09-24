@@ -3,7 +3,7 @@
 The console-based handler remains the default because many Kali installs do
 not run ``msgrpc``. When ``MSFRPC_URL`` is configured, this client provides a
 session-aware transport that does not depend on parsing a shared console.
-It is deliberately dependency-lazy: importing KMN-CyberSeek still works when
+It is deliberately dependency-lazy: importing omitest still works when
 the optional ``msgpack`` package is not installed.
 """
 

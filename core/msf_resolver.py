@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek CVE -> Metasploit module resolver.
+omitest CVE -> Metasploit module resolver.
 
 Bridges a discovered CVE to a ready-to-use Metasploit module deterministically,
 instead of relying on the LLM to remember whether a module exists. When a finding

@@ -6,7 +6,7 @@ coverage. This is the yardstick for every coverage-engine milestone (see
 `docs/coverage-engine-buildplan.md`).
 
 This is currently a **self-scored project benchmark**, not an independent or
-third-party benchmark. It must not be used to claim that KMN-CyberSeek is better
+third-party benchmark. It must not be used to claim that omitest is better
 than PentestGPT, CAI, XBOW, or any other system. See `benchmarks/manifest.json` for
 the reproducibility and comparison policy.
 
@@ -14,10 +14,10 @@ the reproducibility and comparison policy.
 
 ```bash
 # Score a downloaded Markdown report
-python benchmarks/score.py /path/to/kmn_report_<id>.md
+python benchmarks/score.py /path/to/omitest_report_<id>.md
 
 # Choose a lab explicitly / machine-readable output
-python benchmarks/score.py report.md --lab benchmarks/labs/kmn_training_win.json --json
+python benchmarks/score.py report.md --lab benchmarks/labs/omitest_training_win.json --json
 
 # Print the explicit code-level capability inventory (not a leaderboard)
 python benchmarks/compare_capabilities.py
@@ -28,7 +28,7 @@ python benchmarks/compare_capabilities.py
 - **confirmed** — a signal appears in a confirmed section (Confirmed Compromises / Credentials Captured / Vulnerability Findings).
 
 ## Labs
-- `labs/kmn_training_win.json` — Windows Server 2019 training lab (192.168.100.194), 35 ground-truth items across 5 categories.
+- `labs/omitest_training_win.json` — Windows Server 2019 training lab (192.168.100.194), 35 ground-truth items across 5 categories.
 
 ## Baseline (pre-coverage-engine, v2.2.7)
 

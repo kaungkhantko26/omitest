@@ -1,10 +1,10 @@
-Project Name: KMN-CyberSeek
+Project Name: omitest
 Concept: AI-Driven Autonomous Red Team Operator
 Base Vision: A superior alternative to PentestGPT with full automation, integrated execution, and a modern web dashboard.
 
 1. Core Objective
 Build an autonomous hacking framework that doesn't just suggest attacks (like PentestGPT) but actually executes them. It should take a target IP/Domain, perform reconnaissance, reason using LLMs (DeepSeek), and execute subsequent exploitation steps automatically or with human-in-the-loop approval.
-Prefer DeepSeek API keys for KMN-CyberSeek project.
+Prefer DeepSeek API keys for omitest project.
 
 2. System Architecture
 Backend: Python (FastAPI) as the central orchestrator.
@@ -49,7 +49,7 @@ Iterate: Capture new data (e.g., a new service found on a non-standard port) and
 - Ensure the Web UI reflects the current 'Kill Chain' stage of the target.
 
 6. Future Integration (Roadmap)
-KMN-Training-Win Integration: Specifically tuned to exploit Active Directory environments.
+omitest-training-win Integration: Specifically tuned to exploit Active Directory environments.
 
 LLM Security: Capable of testing other AI implementations for Prompt Injection.
 

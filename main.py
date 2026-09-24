@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field, field_validator
 import httpx
 import uvicorn
 
-from ai.connector import KMN_AI_Connector
+from ai.connector import OmitestAIConnector
 from core.orchestrator import Orchestrator
 from core.scanner import Scanner
 from core.shell_manager import validate_handler_config
@@ -149,7 +149,7 @@ async def enforce_api_key(request: Request, call_next):
 # Global instances
 ai_provider = os.getenv("AI_PROVIDER")
 # If AI_PROVIDER is not set, let the connector auto-detect based on API key presence
-ai_connector = KMN_AI_Connector(provider=ai_provider)
+ai_connector = OmitestAIConnector(provider=ai_provider)
 scanner = Scanner()
 orchestrator = Orchestrator(ai_connector, scanner)
 
@@ -339,7 +339,7 @@ class AdvancedSettings(BaseModel):
     log_level: str = "INFO"
     log_file: str = "backend.log"
     debug: bool = False
-    db_path: str = "kmn_cyberseek.db"
+    db_path: str = "omitest.db"
     full_auto_mode: bool = False
     ollama_context_window: int = 8192
 
@@ -566,13 +566,13 @@ async def download_session_report(session_id: str):
     try:
         import tempfile, os
         out_dir = tempfile.gettempdir()
-        out_path = os.path.join(out_dir, f"kmn_report_{session_id[:12]}.docx")
+        out_path = os.path.join(out_dir, f"omitest_report_{session_id[:12]}.docx")
         generate_report(report_data, output_path=out_path)
     except Exception as e:
         logger.error(f"Report generation failed for session {session_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Report generation failed: {e}")
 
-    filename = f"kmn_report_{session_id[:12]}.docx"
+    filename = f"omitest_report_{session_id[:12]}.docx"
     return FileResponse(
         path=out_path,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -598,13 +598,13 @@ async def download_session_report_pdf(session_id: str):
     try:
         import tempfile
         out_dir = tempfile.gettempdir()
-        out_path = os.path.join(out_dir, f"kmn_report_{session_id[:12]}.pdf")
+        out_path = os.path.join(out_dir, f"omitest_report_{session_id[:12]}.pdf")
         generate_pdf_report(report_data, output_path=out_path)
     except Exception as e:
         logger.error(f"PDF report generation failed for session {session_id}: {e}")
         raise HTTPException(status_code=500, detail=f"PDF report generation failed: {e}")
 
-    filename = f"kmn_report_{session_id[:12]}.pdf"
+    filename = f"omitest_report_{session_id[:12]}.pdf"
     return FileResponse(
         path=out_path,
         media_type="application/pdf",
@@ -666,13 +666,13 @@ async def download_session_report_md(session_id: str):
         from core.report_generator import generate_markdown_report
         import tempfile
         out_dir = tempfile.gettempdir()
-        out_path = os.path.join(out_dir, f"kmn_report_{session_id[:12]}.md")
+        out_path = os.path.join(out_dir, f"omitest_report_{session_id[:12]}.md")
         generate_markdown_report(report_data, output_path=out_path)
     except Exception as e:
         logger.error(f"Markdown report generation failed for session {session_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Markdown report generation failed: {e}")
 
-    filename = f"kmn_report_{session_id[:12]}.md"
+    filename = f"omitest_report_{session_id[:12]}.md"
     return FileResponse(
         path=out_path,
         media_type="text/markdown",
@@ -692,7 +692,7 @@ async def download_session_archive(session_id: str):
         logger.error(f"Session archive failed for {session_id}: {exc}")
         raise HTTPException(status_code=500, detail=f"Session archive failed: {exc}")
 
-    filename = f"kmn_archive_{session_id[:12]}.zip"
+    filename = f"omitest_archive_{session_id[:12]}.zip"
     return FileResponse(
         path=archive_path,
         media_type="application/zip",
@@ -1426,7 +1426,7 @@ async def update_ai_settings(settings: AISettings):
 
     # Re-initialize the global AI connector with new settings
     global ai_connector, orchestrator
-    ai_connector = KMN_AI_Connector(
+    ai_connector = OmitestAIConnector(
         provider=provider_code,
         api_key=settings.api_key or None,
         local_model=local_model,
@@ -1467,7 +1467,7 @@ async def test_ai_settings(settings: AIConnectionTest):
     else:
         normalized_url = None
     try:
-        probe = KMN_AI_Connector(
+        probe = OmitestAIConnector(
             provider=provider_code,
             api_key=settings.api_key or None,
             local_model=settings.model_name or None,
@@ -1532,7 +1532,7 @@ async def update_advanced_settings(settings: AdvancedSettings):
     set_key(env_path, "LOG_LEVEL",       log_level)
     set_key(env_path, "LOG_FILE",        settings.log_file or "backend.log")
     set_key(env_path, "DEBUG",           str(settings.debug).lower())
-    set_key(env_path, "DB_PATH",         settings.db_path or "kmn_cyberseek.db")
+    set_key(env_path, "DB_PATH",         settings.db_path or "omitest.db")
     set_key(env_path, "FULL_AUTO_MODE",          str(settings.full_auto_mode).lower())
     set_key(env_path, "OLLAMA_CONTEXT_WINDOW",    str(settings.ollama_context_window))
 

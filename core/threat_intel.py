@@ -1,5 +1,5 @@
 """
-KMN-CyberSeek Threat Intel Research Module
+omitest Threat Intel Research Module
 AI-directed web research for vulnerability/CVE information, feeding a local
 reference cache (orchestrator's `threat_intel` table) that pentest sessions can
 cross-reference against later - this is the "let the local database get better
@@ -41,7 +41,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-USER_AGENT = "KMN-CyberSeek-ThreatIntel/1.0 (+security research tool, operator-run)"
+USER_AGENT = "omitest-ThreatIntel/1.0 (+security research tool, operator-run)"
 _FETCH_TIMEOUT = 20.0
 _MAX_PAGE_CHARS = 80000        # rough pre-cap on raw HTML before stripping tags
 _MAX_CANDIDATE_URLS = 5        # bound how many pages we follow per topic (cost/time/risk control)
@@ -116,7 +116,7 @@ async def research_topic(topic: str, ai_connector) -> List[Dict]:
 
     Args:
         topic: free-text topic, e.g. "Apache httpd" or "latest critical CVEs 2026"
-        ai_connector: an ai.connector.KMN_AI_Connector instance, reused for the
+        ai_connector: an ai.connector.OmitestAIConnector instance, reused for the
             extraction step via its ask_raw_async() method (isolated prompt,
             see module docstring)
 

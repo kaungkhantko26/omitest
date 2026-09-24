@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KMN-CyberSeek AI Reasoning Eval Harness
+omitest AI Reasoning Eval Harness
 =======================================
 
 Measures the QUALITY of the AI's next-step decisions against fixed engagement
@@ -18,7 +18,7 @@ Usage
 
 Exit codes: 0 = ran (or self-check ok); 2 = no provider configured; 1 = harness error.
 
-The harness reuses the real KMN_AI_Connector, so it exercises the exact prompt and
+The harness reuses the real OmitestAIConnector, so it exercises the exact prompt and
 parsing path the live loop uses.
 """
 
@@ -68,12 +68,12 @@ async def _decide(connector, scenario):
 
 async def run_provider(runs, json_out=None):
     try:
-        from ai.connector import KMN_AI_Connector
+        from ai.connector import OmitestAIConnector
     except Exception as e:
         print(f"[error] cannot import connector (install requirements.txt?): {e}")
         return 1
 
-    connector = KMN_AI_Connector()
+    connector = OmitestAIConnector()
     if connector.provider == "api" and not connector.api_key:
         print("[skip] No DeepSeek API key and provider is 'api'. "
               "Set DEEPSEEK_API_KEY or configure local Ollama, then re-run.")
@@ -81,7 +81,7 @@ async def run_provider(runs, json_out=None):
 
     model = connector.api_model if connector.provider == "api" else connector.local_model
     metadata = {
-        "format": "kmn-reasoning-eval",
+        "format": "omitest-reasoning-eval",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "provider": connector.provider,
         "model": model,
@@ -169,7 +169,7 @@ def run_selfcheck():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="KMN-CyberSeek AI reasoning evals")
+    ap = argparse.ArgumentParser(description="omitest AI reasoning evals")
     ap.add_argument("--runs", type=int, default=3, help="runs per scenario (provider mode)")
     ap.add_argument("--selfcheck", action="store_true", help="validate scoring rules offline")
     ap.add_argument("--json-out", help="write provider/model/run metadata and results to JSON")

@@ -19,7 +19,7 @@ Run the backend inside a disposable container or VM with:
 Example container boundary (adapt the image and network to the lab):
 
 ```bash
-docker run --rm --name kmn-cyberseek \
+docker run --rm --name omitest \
   --network pentest-lab \
   --cap-drop=ALL --cap-add=NET_RAW \
   --security-opt=no-new-privileges \
@@ -27,7 +27,7 @@ docker run --rm --name kmn-cyberseek \
   --pids-limit=256 --memory=4g --cpus=2 \
   -e FULL_AUTO_MODE=false \
   -e SCOPE_ALLOWLIST=192.168.100.0/24 \
-  kmn-cyberseek:lab
+  omitest:lab
 ```
 
 Do not expose the backend beyond the lab operator network. Container isolation
