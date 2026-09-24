@@ -73,9 +73,18 @@ fi
 if [ -n "$_MISSING_TOOLS" ] && [ "${SKIP_TOOL_INSTALL:-false}" != "true" ]; then
     echo "⚠️  Missing pentest tools:$_MISSING_TOOLS"
     if command -v apt-get &> /dev/null; then
-        echo "   Attempting install (sudo apt-get install ...) — Ctrl+C to skip."
-        sudo apt-get install -y $_MISSING_TOOLS 2>/dev/null || \
-            echo "   Install skipped/failed — the AI will avoid these tools and use alternatives."
+        if [ "$(id -u)" -eq 0 ]; then
+            echo "   Attempting install (apt-get install ...)."
+            apt-get install -y $_MISSING_TOOLS 2>/dev/null || \
+                echo "   Install skipped/failed — the AI will avoid these tools and use alternatives."
+        elif command -v sudo &>/dev/null && sudo -n true 2>/dev/null; then
+            echo "   Attempting install with passwordless sudo."
+            sudo -n apt-get install -y $_MISSING_TOOLS 2>/dev/null || \
+                echo "   Install skipped/failed — the AI will avoid these tools and use alternatives."
+        else
+            echo "   Automatic install skipped (no non-interactive root access)."
+            echo "   Install later as root: apt-get install -y$_MISSING_TOOLS"
+        fi
     else
         echo "   Install them for best results (Kali: sudo apt install$_MISSING_TOOLS)."
     fi
