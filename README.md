@@ -1,0 +1,274 @@
+# omitest
+
+![Version](https://img.shields.io/badge/Version-2.6.2-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.8%2B-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+AI-driven autonomous penetration testing framework with policy-constrained full-auto execution and optional human oversight. Executes a full offensive engagement pipeline — OSINT → exploitation — using an LLM (DeepSeek API or local Ollama).
+
+Benchmark and evaluation results in this repository are self-scored engineering
+measurements. They are not independent third-party validation and do not support
+claims that omitest outperforms another security agent. See
+`benchmarks/manifest.json` for the comparison policy.
+
+**Repository:** [https://github.com/kaungkhantko26/omitest](https://github.com/kaungkhantko26/omitest)
+
+---
+
+## Recommended OS
+
+**Kali Linux** (all pentest tools pre-installed). Any Debian/Ubuntu-based distro with the standard security toolchain also works. macOS and plain Windows are not recommended.
+
+**RAM:** at least **8GB**, whether Kali is bare-metal or a VM. Below that, the backend/frontend/Metasploit/nmap combination — especially during a long-running autonomous session — can push the system into swap and make the UI (including clicking Approve) feel like it's hanging. If you're running a local Ollama model instead of a cloud API provider, budget several GB more on top of the 8GB baseline for the model itself (a 7B model needs roughly 6-8GB, 14B roughly 12-16GB).
+
+---
+
+## Architecture
+
+```
+Streamlit Frontend  (port 8501)
+         │
+FastAPI Backend     (port 6000)
+   Orchestrator │ Scanner │ AI Connector │ SQLite DB
+         │               │               │
+   AI Engine         Nmap/NSE        Shell Exec
+  DeepSeek/Ollama   VulnScripts      (Kali env)
+```
+
+---
+
+## Installation
+
+**Prerequisites:** Python 3.8+, Nmap (`sudo apt install nmap`), Ollama, or an API key for DeepSeek, OpenAI/ChatGPT, Anthropic Claude, or OpenRouter.
+
+```bash
+git clone https://github.com/kaungkhantko26/omitest.git
+cd omitest
+./start.sh
+```
+
+`start.sh` creates the venv, installs dependencies, resolves port conflicts, and launches both services.
+
+---
+
+## Quick Start
+
+1. Run `./start.sh`
+2. Open `http://localhost:8501`
+3. **Settings → AI Configuration** — connect Ollama or DeepSeek API key
+4. **New Session** — enter target IP / domain and confirm authorization
+5. Watch the session timeline advance through engagement phases
+6. Review **AI Decisions** — approve or let auto-approve handle it
+7. Monitor **Scan Results**, **Vulnerabilities**, **Credentials** as findings accumulate
+
+---
+
+## Configuration
+
+### AI — Ollama (local or remote)
+
+```env
+AI_PROVIDER=local
+OLLAMA_URL=http://192.168.1.50:11434
+OLLAMA_MODEL=qwen2.5:14b
+OLLAMA_CONTEXT_WINDOW=32768
+```
+
+Remote Ollama host: `OLLAMA_HOST=0.0.0.0 ollama serve`
+
+### AI — DeepSeek API
+
+```env
+AI_PROVIDER=api
+DEEPSEEK_API_KEY=sk-...
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+### AI — OpenAI / ChatGPT API
+
+```env
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+```
+
+### AI — Anthropic Claude API
+
+```env
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-3-5-sonnet-latest
+```
+
+### AI — OpenRouter
+
+```env
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=openai/gpt-4o-mini
+```
+
+### AI — OpenAI-compatible gateway
+
+Use **Settings → AI Configuration → OpenAI-Compatible API**, or configure it
+with environment variables. The base URL may end at `/v1` or include the full
+`/chat/completions` path; the connector normalizes both forms.
+
+```env
+AI_PROVIDER=compatible
+COMPATIBLE_BASE_URL=https://globalblamp.vercel.app/v1
+COMPATIBLE_API_KEY=gk-replace-with-your-rotated-key
+COMPATIBLE_MODEL=gpt-5.4
+```
+
+Use **Test connection** in the web settings before saving. The test verifies
+the URL, key, selected model, response shape, and reports round-trip latency.
+Transient gateway errors are retried automatically, and custom gateways that
+reject optional OpenAI parameters receive a minimal compatibility request.
+
+Keys are stored only in the gitignored `.env` file. If a key has been posted in
+chat, an issue, or a terminal transcript, revoke it and create a replacement.
+
+Set `AI_PROVIDER=none` to run without an LLM. In that mode deterministic scan,
+playbook, policy, verification, and reporting paths remain available; LLM-only
+creative exploit selection is explicitly reported as unavailable rather than
+silently guessed.
+
+### Ports
+
+```env
+BACKEND_PORT=6000
+FRONTEND_PORT=8501
+```
+
+### VPS deployment
+
+Keep the backend and Streamlit listener on `127.0.0.1`; do not expose the
+command-execution API directly to the internet. A hardened systemd service and
+an nginx TLS/basic-auth reverse-proxy example are in [`deploy/vps`](deploy/vps/README.md).
+
+### Security
+
+```env
+API_AUTH_TOKEN=          # auto-generated on first run
+BACKEND_HOST=127.0.0.1
+REQUIRE_APPROVAL_HIGH_RISK=true
+APPROVAL_TIMEOUT_MINUTES=15
+SCOPE_ALLOWLIST=10.0.0.0/8,lab.local
+```
+
+### Full Auto Mode
+
+```env
+FULL_AUTO_MODE=false   # true = no approval prompts — isolated labs only
+# Automated execution policy and the binary allowlist remain active in full-auto mode.
+```
+
+### Advanced tuning (optional)
+
+All have sensible defaults; set only if needed.
+
+# AI reply budget + determinism (DeepSeek API / Ollama)
+AI_MAX_TOKENS=4096        # cap on a single AI reply; too small truncates the JSON
+TACTICAL_TEMPERATURE=0.2  # low = fewer hallucinated flags/CVEs for command choice
+
+# Reverse-shell callback routing — a shell only works if the TARGET can reach your
+# listener. On a LAN lab the local IP works; a real internet target behind NAT needs
+# a reachable callback (public IP, ngrok tunnel, or a reverse-SSH endpoint).
+CALLBACK_MODE=auto        # auto | local | public | ngrok | manual
+EXPLOIT_LHOST=            # explicit callback host (VPS public IP / tunnel endpoint)
+EXPLOIT_LPORT=4444        # callback + local listener port
+EXPLOIT_PAYLOAD=          # default: guessed from target OS
+NGROK_AUTHTOKEN=          # required for CALLBACK_MODE=ngrok
+
+# CVE enrichment + exploitability ranking.
+NVD_API_KEY=             # https://nvd.nist.gov/developers/request-an-api-key
+NVD_MIN_INTERVAL=6.5     # seconds between NVD calls when no key is set
+MSF_CVE_RESOLVE=true     # resolve CVE -> Metasploit module via local msfconsole
+MSF_CVE_RESOLVE_LIMIT=3  # how many top-priority CVEs to resolve per pass
+
+# Optional session-aware Metasploit RPC transport. Leave empty to use the
+# managed msfconsole transport. Requires msgrpc and the msgpack dependency.
+MSFRPC_URL=
+MSFRPC_USER=msf
+MSFRPC_PASSWORD=
+MSFRPC_TOKEN=
+
+# Scan / command timeouts (seconds)
+SCAN_TIMEOUT=300
+# Use Nmap OS fingerprinting when the backend has raw-packet privileges; the
+# framework falls back to service/banner evidence for unprivileged runs.
+NMAP_OS_DETECTION=true
+VULN_SCAN_TIMEOUT=120
+VULN_SCAN_CONCURRENCY=4  # bounded parallel per-port NSE scans
+COMMAND_TIMEOUT=600
+# Autonomous execution is argv-first. Enable these only inside an isolated lab
+# if a workflow genuinely requires shell composition or an interpreter.
+AUTONOMOUS_SHELL_COMPOSITION=false
+AUTONOMOUS_RUNTIME_COMMANDS=false
+
+# Agentic-loop safety
+MAX_AUTO_PIVOTS=12       # auto-pivots before pausing for manual review
+MAX_EMPTY_RETRIES=3      # retries when the model returns no command
+WATCHDOG_STALL_SECONDS=  # default: COMMAND_TIMEOUT + 180 (stuck-session revival)
+
+# OSINT stage hold (public domain/host targets) — stops OSINT being skipped after
+# one turn. Advances once enough OSINT tools have run, or the turn cap is hit.
+OSINT_MIN_ACTIONS=3      # distinct OSINT tools before leaving the OSINT stage
+OSINT_MAX_TURNS=6        # hard cap so a low-OSINT target still advances
+
+# Coverage engine — methodology-driven per-service playbooks, known-exploit hints,
+# coverage-derived progress. ON by default; toggle live in Settings → Engine Features
+# (no .env editing needed). Target-agnostic.
+COVERAGE_ENGINE=true
+
+# Decoupled brute-force worker — background credential brute-force on discovered
+# auth services (SSH/FTP/RDP/MySQL/SMB/WinRM). Explicit opt-in; toggle in Settings.
+BRUTEFORCE_ENABLED=false   # explicit opt-in; may trigger account lockouts
+BRUTEFORCE_TIER=default            # default | rockyou | full
+BRUTEFORCE_MAX_SECONDS_PER_SERVICE=600
+BRUTEFORCE_CONCURRENCY=2
+```
+
+> **Tip:** Coverage Engine, Brute-force, and Full-Auto mode can be toggled at
+> runtime from **Settings → Engine Features** — changes apply immediately and are
+> saved to `.env` automatically, so end users never need to edit files.
+
+---
+
+## Further Reading
+
+- [Features & Architecture Detail](features.md)
+- [Changelog](change_log.md)
+
+## Session Retention
+
+Sessions persist their lifecycle events, background jobs, scan state, findings,
+and asset relationships in SQLite. The dashboard can export a portable session
+archive containing the report, event timeline, job records, and manifest:
+
+```text
+GET /api/sessions/{session_id}/archive
+GET /api/sessions/{session_id}/events
+GET /api/sessions/{session_id}/jobs
+POST /api/sessions/{session_id}/cancel
+```
+
+Independent NSE and ExploitDB lookups use bounded concurrency. State-dependent
+exploitation and post-exploitation actions remain ordered. Public targets do not
+receive a private workstation callback address unless a reachable callback mode
+or explicit public endpoint is configured.
+
+---
+
+## Disclaimer
+
+**For authorised security testing and educational purposes only.**
+
+Only use against systems you own or have explicit written permission to test. The developers assume no liability for misuse or damage. `FULL_AUTO_MODE=true` executes destructive commands without confirmation — isolated lab environments only.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).

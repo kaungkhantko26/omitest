@@ -1,0 +1,29 @@
+[Unit]
+Description=omitest authorized security testing service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=omitest
+Group=omitest
+WorkingDirectory=/opt/omitest
+Environment=PYTHONUNBUFFERED=1
+Environment=SKIP_DEPENDENCY_INSTALL=true
+Environment=SKIP_TOOL_INSTALL=true
+ExecStart=/opt/omitest/start.sh
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+KillMode=control-group
+NoNewPrivileges=true
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/omitest
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

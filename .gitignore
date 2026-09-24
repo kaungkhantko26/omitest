@@ -1,0 +1,32 @@
+# Environment / secrets (contains API_AUTH_TOKEN, DEEPSEEK_API_KEY, etc. - never commit)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Logs & runtime data (may contain scan output / session data from real engagements)
+*.log
+terminal_output.txt
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# OS
+.DS_Store
+._*
+
+# Internal review notes / private scratch docs (may contain non-English text) —
+# never publish to the public repository.
+KMN-CyberSeek-review.md
+*.review.md
+/notes/
+/private/
+
+# Kode agent internal state (memory + scan scratch) — never commit to repo
+.kode/
