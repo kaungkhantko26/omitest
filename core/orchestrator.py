@@ -4223,6 +4223,10 @@ Domain rule: If Target Domain is provided ({session.target_domain}), use domain 
                 await self._handle_empty_command(session_id, "post_command_no_response")
                 return
 
+            # A valid provider response ends any transient retry episode.
+            session._analysis_retry_count = 0
+            session._analysis_retry_active = False
+
             # Store AI decision — include attack_phase so the frontend timeline
             # can identify which stages actually had decisions (vs. skipped).
             _suggested = (ai_response.suggested_command or "").strip()
@@ -4575,6 +4579,82 @@ Domain rule: If Target Domain is provided ({session.target_domain}), use domain 
                 ):
                     self._schedule_safe_followup(session)
 
+        except ConnectionError as e:
+            # Provider/network failures are transient. Retry the SAME analysis
+            # with bounded exponential backoff instead of converting them into
+            # a fatal loop_error that requires repeated Resume clicks. Only one
+            # retry task may exist per session, preventing a retry storm.
+            _sess = self.sessions.get(session_id)
+            if not _sess:
+                return
+            retries = int(getattr(_sess, "_analysis_retry_count", 0)) + 1
+            _sess._analysis_retry_count = retries
+            max_retries = 3
+            if retries <= max_retries:
+                delay = (5, 15, 30)[retries - 1]
+                _sess.status = "analyzing"
+                self._touch_activity(session_id)
+                if not getattr(_sess, "_analysis_retry_active", False):
+                    _sess._analysis_retry_active = True
+                    _d = {
+                        "timestamp": datetime.now().isoformat(),
+                        "reasoning": (
+                            f"AI provider connection failed ({e}). Automatic retry "
+                            f"{retries}/{max_retries} scheduled in {delay}s."
+                        ),
+                        "suggested_command": "",
+                        "risk_level": "low",
+                        "confidence": 1.0,
+                        "context": "ai_provider_retrying",
+                        "attack_phase": _sess.current_stage,
+                    }
+                    _sess.ai_decisions.append(_d)
+                    self._save_ai_decision(session_id, _d)
+
+                    async def _retry_analysis() -> None:
+                        try:
+                            await asyncio.sleep(delay)
+                            current = self.sessions.get(session_id)
+                            if not current or current.status in {
+                                "completed", "cancelled", "needs_operator"
+                            }:
+                                return
+                            current._analysis_retry_active = False
+                            await self._process_command_output(
+                                session_id, command, output, error
+                            )
+                        finally:
+                            current = self.sessions.get(session_id)
+                            if current:
+                                current._analysis_retry_active = False
+
+                    self._track_task(
+                        session_id, _retry_analysis(), "ai_provider_retry"
+                    )
+                self._save_session_status(session_id, _sess)
+                return
+
+            _sess._analysis_retry_active = False
+            _sess.status = "ready"
+            # Add this terminal retry event only once, even if a watchdog or a
+            # double click races with the final failed attempt.
+            if not (_sess.ai_decisions and
+                    _sess.ai_decisions[-1].get("context") == "ai_provider_retry_exhausted"):
+                _d = {
+                    "timestamp": datetime.now().isoformat(),
+                    "reasoning": (
+                        f"AI provider remained unavailable after {max_retries} automatic "
+                        f"retries: {e}. The session is safe and resumable."
+                    ),
+                    "suggested_command": "",
+                    "risk_level": "low",
+                    "confidence": 1.0,
+                    "context": "ai_provider_retry_exhausted",
+                    "attack_phase": _sess.current_stage,
+                }
+                _sess.ai_decisions.append(_d)
+                self._save_ai_decision(session_id, _d)
+            self._save_session_status(session_id, _sess)
         except Exception as e:
             # Do NOT silently die — a swallowed exception here leaves the session
             # stuck at status=ready with no pending command and no visible reason.
@@ -4594,8 +4674,13 @@ Domain rule: If Target Domain is provided ({session.target_domain}), use domain 
                     "confidence": 1.0,
                     "context": "loop_error",
                 }
-                _sess.ai_decisions.append(_d)
-                self._save_ai_decision(session_id, _d)
+                # Do not append the same error forever if Resume repeatedly
+                # encounters an unchanged deterministic bug.
+                if not (_sess.ai_decisions and
+                        _sess.ai_decisions[-1].get("context") == "loop_error" and
+                        _sess.ai_decisions[-1].get("reasoning") == _d["reasoning"]):
+                    _sess.ai_decisions.append(_d)
+                    self._save_ai_decision(session_id, _d)
                 self._save_session_status(session_id, _sess)
     
     def approve_command(self, session_id: str, command_id: str) -> Dict:

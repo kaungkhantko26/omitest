@@ -1167,7 +1167,7 @@ async def resume_session(session_id: str):
     # case Resume must actually restart analysis (not no-op).
     _PAUSED_CTX = {
         "loop_error", "no_next_step", "watchdog_stalled",
-        "pivot_limit_reached", "loop_prevention",
+        "pivot_limit_reached", "loop_prevention", "ai_provider_retry_exhausted",
     }
     _last_ctx = session.ai_decisions[-1].get("context") if session.ai_decisions else ""
     _is_paused = _last_ctx in _PAUSED_CTX

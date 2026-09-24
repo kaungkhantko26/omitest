@@ -1463,6 +1463,17 @@ def show_session_overview(session_details: Dict):
             "⚠️ **Agentic loop error** — analysis of the last command's output failed. "
             "Auto-execution paused. Click **Resume** to retry, or run the next step manually."
         )
+    elif _last_ctx == "ai_provider_retrying":
+        st.info(
+            "🔄 **AI provider temporarily unavailable** — omitest is retrying "
+            "automatically. Do not click Resume; duplicate retries are prevented."
+        )
+    elif _last_ctx == "ai_provider_retry_exhausted":
+        st.warning(
+            "⚠️ **AI provider still unavailable after automatic retries.** The session "
+            "was not failed and no command loop was created. Check the API in Settings, "
+            "then click **Resume** once."
+        )
     elif _last_ctx == "watchdog_stalled":
         st.error(
             "🐕 **Watchdog: session was stuck** — it stopped making progress and didn't "
