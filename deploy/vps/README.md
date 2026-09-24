@@ -14,6 +14,15 @@ cd omitest
 sudo bash deploy/vps/install-linux.sh
 ```
 
+The default `standard` Kali profile installs useful web/network scanners while
+avoiding the largest packages. Choose based on VPS disk size:
+
+```bash
+sudo env OMITEST_TOOL_PROFILE=minimal bash deploy/vps/install-linux.sh  # 1 GB free
+sudo env OMITEST_TOOL_PROFILE=standard bash deploy/vps/install-linux.sh # 3 GB free
+sudo env OMITEST_TOOL_PROFILE=full bash deploy/vps/install-linux.sh     # 8+ GB free
+```
+
 The installer uses `https://github.com/kaungkhantko26/omitest.git` by default,
 creates an unprivileged `omitest` account, installs Python and Nmap, builds the
 virtual environment, preserves an existing `.env`, and enables automatic boot
@@ -108,6 +117,12 @@ Follow logs and verify the public health endpoint locally:
 ```bash
 sudo journalctl -u omitest -f
 curl -fsS http://127.0.0.1:6000/health
+```
+
+Apply later updates with an automatic `.env`/database backup and health check:
+
+```bash
+sudo /opt/omitest/deploy/vps/update-linux.sh
 ```
 
 The authenticated diagnostics endpoint reports database health and missing
