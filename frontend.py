@@ -215,10 +215,68 @@ _terminal_css = """
     ::-webkit-scrollbar { width: 9px; height: 9px; }
     ::-webkit-scrollbar-track { background: #05090d; }
     ::-webkit-scrollbar-thumb { background: #173a42; border-radius: 9px; border: 2px solid #05090d; }
+
+    /* Keep data-heavy views usable without forcing the whole page wider. */
+    [data-testid="stDataFrame"], [data-testid="stTable"],
+    [data-testid="stJson"], [data-testid="stCodeBlock"] {
+        max-width: 100%; overflow-x: auto;
+    }
+    [data-testid="stTabs"] [data-baseweb="tab-list"] {
+        overflow-x: auto; scrollbar-width: thin; flex-wrap: nowrap;
+    }
+    [data-testid="stTabs"] [data-baseweb="tab"] { flex: 0 0 auto; }
+    img, svg, canvas { max-width: 100%; }
+    .terminal-output, pre, code { overflow-wrap: anywhere; word-break: break-word; }
+
+    /* Six dashboard metrics become two rows on laptops and tablets. */
+    @media (max-width: 1180px) {
+        .block-container { padding-inline: 1.25rem; }
+        [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+        [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+            flex: 1 1 min(30%, 17rem) !important;
+            width: auto !important; min-width: 0 !important;
+        }
+    }
+
     @media (max-width: 800px) {
-        .block-container { padding: .8rem .8rem 3rem; }
-        .terminal-chrome { font-size: .65rem; overflow: hidden; white-space: nowrap; }
-        .main-header { font-size: 1.45rem; }
+        [data-testid="stHeader"] { height: 3rem; }
+        .block-container { padding: .55rem .75rem 2.5rem; max-width: 100%; }
+        .terminal-chrome {
+            font-size: .66rem; gap: .38rem; margin-bottom: .8rem; padding: .62rem .72rem;
+            overflow: hidden; white-space: nowrap;
+        }
+        .terminal-chrome .prompt { margin-left: .15rem; }
+        .terminal-chrome span:last-child { overflow: hidden; text-overflow: ellipsis; }
+        .main-header { font-size: clamp(1.35rem, 8vw, 1.8rem); margin-bottom: 1rem; }
+        .sub-header { font-size: 1rem; }
+        .settings-hero { padding: 1rem; }
+        .settings-hero h1 { font-size: 1.4rem; }
+        .setup-step { min-height: 0; }
+
+        /* Streamlit columns must become real single-column rows on phones. */
+        [data-testid="stHorizontalBlock"] { display: flex; flex-direction: column; gap: .65rem; }
+        [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+            flex: 1 1 100% !important; width: 100% !important; min-width: 0 !important;
+        }
+        [data-testid="stHorizontalBlock"] [data-testid="stButton"] > button,
+        [data-testid="stHorizontalBlock"] [data-testid="stDownloadButton"] > button,
+        [data-testid="stFormSubmitButton"] > button { width: 100%; }
+        [data-testid="stMetric"] { padding: .72rem .85rem; }
+        [data-testid="stMetricValue"] { font-size: 1.7rem; }
+
+        [data-testid="stSidebar"] { max-width: min(88vw, 21rem); }
+        [data-testid="stSidebar"] iframe { width: 100% !important; max-width: 100%; }
+        [data-testid="stSidebarContent"] { padding-inline: .65rem; }
+        [data-testid="stTabs"] [data-baseweb="tab"] { padding: .48rem .7rem; }
+        .session-card, .command-card { padding: .8rem; }
+    }
+
+    @media (max-width: 420px) {
+        .block-container { padding-inline: .55rem; }
+        .terminal-chrome .dot { width: 8px; height: 8px; }
+        .terminal-chrome .prompt { font-size: .62rem; }
+        .main-header { letter-spacing: -.06em; }
+        [data-testid="stAlert"] { padding: .75rem; }
     }
 </style>
 """.replace("__BACKGROUND__", _background_data)
