@@ -35,3 +35,27 @@ def test_os_classifier_detects_x86_without_overriding_samba_linux():
     )
     assert result["os_family"] == "linux"
     assert result["architecture"] == "x86"
+
+
+def test_os_classifier_uses_explicit_whatweb_platform_markers():
+    linux = classify_os(
+        "https://host [200 OK] Apache[2.4.52], Apache-Ubuntu, Ubuntu Linux",
+        [{"port": 443, "service": "https", "version": ""}],
+    )
+    windows = classify_os(
+        "https://host [200 OK] Microsoft-IIS[10.0], X-Powered-By[ASP.NET]",
+        [{"port": 443, "service": "https", "version": ""}],
+    )
+    assert linux["os_family"] == "linux"
+    assert linux["os_confidence"] >= 0.8
+    assert windows["os_family"] == "windows"
+    assert windows["os_confidence"] >= 0.8
+
+
+def test_os_classifier_does_not_invent_origin_os_from_generic_web_stack():
+    result = classify_os(
+        "Cloudflare, WordPress, PHP, nginx, HTTPServer[cloudflare]",
+        [{"port": 443, "service": "https", "version": ""}],
+    )
+    assert result["os_family"] == "unknown"
+    assert result["os_confidence"] == 0.0

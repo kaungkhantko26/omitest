@@ -94,13 +94,23 @@ def classify_os(os_guess: str = "", ports: Optional[List[Dict]] = None) -> Dict:
             windows_score += score
             windows_evidence.append(evidence)
 
-    for marker in ("linux", "unix", "ubuntu", "debian", "red hat", "centos",
-                   "fedora", "freebsd", "openbsd", "suse"):
+    for marker in ("linux", "unix", "ubuntu", "debian", "red hat", "rhel",
+                   "centos", "fedora", "alpine", "freebsd", "openbsd", "suse"):
         if marker in guess:
-            add("linux", 5, f"Nmap OS guess contains {marker}")
-    for marker in ("windows", "microsoft", "windows server", "win32", "win64"):
+            add("linux", 5, f"Fingerprint contains explicit {marker} marker")
+    for marker in ("windows", "microsoft-iis", "windows server", "win32", "win64"):
         if marker in guess:
-            add("windows", 5, f"Nmap OS guess contains {marker}")
+            add("windows", 5, f"Fingerprint contains explicit {marker} marker")
+
+    # WhatWeb and HTTP headers can improve an otherwise empty Nmap result, but
+    # only when they expose an OS-specific platform. Generic Apache/nginx/PHP,
+    # a CMS, or a CDN does *not* identify the origin operating system.
+    for marker in ("microsoft httpapi", "httpapi/2.0", "win-iis", "iis windows"):
+        if marker in guess:
+            add("windows", 4, f"Web fingerprint contains Windows-specific {marker}")
+    for marker in ("apache-ubuntu", "apache-debian", "ubuntu linux", "debian linux"):
+        if marker in guess:
+            add("linux", 4, f"Web fingerprint contains Linux-specific {marker}")
 
     linux_services = ("openssh", "ssh", "vsftpd", "proftpd", "apache", "nginx",
                       "httpd", "cups", "rpcbind", "postfix", "dovecot", "samba")

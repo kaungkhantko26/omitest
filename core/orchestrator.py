@@ -3077,6 +3077,24 @@ If Target Domain is provided ({session.target_domain}), ALWAYS use the domain na
                     self._schedule_safe_followup(session)
                 logger.info(f"Initial command queued for approval: {_cmd[:100]}")
 
+        except ConnectionError as e:
+            # A remote AI gateway timeout is transient and must not permanently
+            # fail an otherwise healthy engagement. Keep it resumable and put a
+            # visible diagnostic in the decision log.
+            logger.error(f"AI analysis temporarily unavailable for session {session_id}: {e}")
+            session.status = "ready"
+            decision = {
+                "timestamp": datetime.now().isoformat(),
+                "reasoning": f"AI provider temporarily unavailable: {e}. Use Resume to retry.",
+                "suggested_command": "",
+                "risk_level": "low",
+                "confidence": 1.0,
+                "context": "ai_provider_retry",
+                "attack_phase": session.current_stage,
+            }
+            session.ai_decisions.append(decision)
+            self._save_ai_decision(session_id, decision)
+            self._save_session_status(session_id, session)
         except Exception as e:
             logger.error(f"AI analysis failed for session {session_id}: {e}")
             session.status = "failed"
@@ -4754,11 +4772,18 @@ Domain rule: If Target Domain is provided ({session.target_domain}), use domain 
 
     def _update_target_fingerprint_from_output(self, session: "Session",
                                                command: str, output: str) -> None:
-        """Upgrade OS/architecture state from an authenticated or Nmap result."""
+        """Upgrade OS/architecture state from trustworthy fingerprint output.
+
+        WhatWeb/HTTP evidence is accepted only through ``classify_os``'s
+        OS-specific markers. A generic web stack or Cloudflare response remains
+        unknown rather than being presented as a fabricated origin OS.
+        """
         c = (command or "").lower()
         if not (c.startswith("nmap") or c.startswith("uname")
                 or c.startswith("systeminfo") or c.startswith("sysinfo")
-                or c.startswith("getuid") or c == "id"):
+                or c.startswith("getuid") or c == "id"
+                or c.startswith("whatweb")
+                or (c.startswith("curl") and any(flag in c for flag in (" -i", " -I", " --head")))):
             return
         result = classify_os(output or "", [])
         if result["os_family"] != "unknown" and result["os_confidence"] >= session.target_os_confidence:
@@ -4770,6 +4795,26 @@ Domain rule: If Target Domain is provided ({session.target_domain}), use domain 
             session.target_architecture = result["architecture"]
             session.target_architecture_confidence = result["architecture_confidence"]
             session.target_architecture_evidence = result["architecture_evidence"]
+
+        # Keep the host cards in sync with the session-level result. Prefer a
+        # host named in the command; for a single-host engagement the only host
+        # is unambiguous even when the command used the original domain name.
+        candidates = [
+            host for host in session.discovered_hosts
+            if str(host.get("ip") or "").lower() in c
+            or str(host.get("host") or "").lower() in c
+            or str(host.get("hostname") or "").lower() in c
+        ]
+        if not candidates and len(session.discovered_hosts) == 1:
+            candidates = session.discovered_hosts[:1]
+        for host in candidates:
+            combined = " ".join(filter(None, [str(host.get("os_guess") or ""), output or ""]))
+            host_result = classify_os(combined, host.get("ports", []))
+            if (host_result["os_family"] != "unknown"
+                    and host_result["os_confidence"] >= float(host.get("os_confidence") or 0.0)):
+                host.update(host_result)
+        if candidates:
+            self._refresh_target_os(session)
 
     @staticmethod
     def _merge_services(session: "Session", new_hosts: List[Dict]) -> None:

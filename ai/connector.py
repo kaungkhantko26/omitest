@@ -350,7 +350,7 @@ class OmitestAIConnector:
                     response = await client.post(
                         self.api_urls[self.provider], json=variant, headers=headers
                     )
-                except (httpx.ConnectError, httpx.ReadTimeout, httpx.RemoteProtocolError):
+                except httpx.RequestError:
                     if attempt == 2:
                         raise
                     await asyncio.sleep(0.5 * (2 ** attempt))
@@ -649,8 +649,14 @@ class OmitestAIConnector:
                 return None  # Caller handles None: retry+visible-halt recovery
 
         except (httpx.RequestError, ValueError) as e:
-            logger.error(f"API request failed: {e}")
-            raise ConnectionError(f"Failed to connect to {self.provider} API: {e}")
+            # Several httpx timeout exceptions stringify to an empty string.
+            # Include the concrete exception type so the UI/logs explain what
+            # actually failed instead of displaying a blank API error.
+            detail = str(e).strip() or e.__class__.__name__
+            logger.error("API request failed (%s): %s", e.__class__.__name__, detail)
+            raise ConnectionError(
+                f"Failed to connect to {self.provider} API ({e.__class__.__name__}): {detail}"
+            ) from e
     
     def ask_ai(self, prompt: str, session_id: Optional[str] = None) -> AIResponse:
         """
